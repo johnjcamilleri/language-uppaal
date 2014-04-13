@@ -103,12 +103,12 @@ prettyParams :: [Parameter] -> Doc
 prettyParams = hsep . punctuate comma . fmap prettyParam
 
 prettyParam :: Parameter -> Doc
-prettyParam p = prettyType (paramType p) <+> 
+prettyParam p = prettyType (paramType p) <+>
                 (case paramConvention p of
-                    CallByValue -> empty
-                    CallByReference -> char '&') <>
+                    CallByValue -> (<+>) empty
+                    CallByReference -> (<>) (char '&'))
                 (text $ paramName p) <>
-                (prettyArrayDecl $ paramArray p)                
+                (prettyArrayDecl $ paramArray p)
 
 prettyType :: Type -> Doc
 prettyType tp = (case typePrefix tp of
