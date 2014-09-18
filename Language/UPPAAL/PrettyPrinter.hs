@@ -60,7 +60,7 @@ instance XmlPickler (Positional Location) where
              (xpOption $ positional "name" xpText)
              (xpList xpickle)
              (xpDefault False $ xpElem "urgent" $ xpLift True)
-             (xpDefault False $ xpElem "commited" $ xpLift True))
+             (xpDefault False $ xpElem "committed" $ xpLift True))
 
 instance XmlPickler (Positional Transition) where
   xpickle = positional "transition" $ xpWrap (\(i,c,s,t,l,n) -> Transition i s t l n c,
