@@ -21,8 +21,8 @@ instance XmlPickler Specification where
              (xpList1 xpickle)
              (xpOption $ xpElem "instantiation" xpText)
              (xpElem "system" xpText))
-             
-            
+
+
 
 instance XmlPickler LabelKind where
   xpickle = xpWrapMaybe (\name -> case name of
@@ -47,7 +47,7 @@ instance XmlPickler (Positional Label) where
   xpickle = positional "label" $ xpWrap (\(x,y) -> Label x (error "Can't parse expressions yet"),
                                          \lbl -> (lblKind lbl,render $ prettyExprs (case lblKind lbl of
                                                                                        Guard -> text " and"
-                                                                                       _ -> comma
+                                                                                       _ -> text ",\n" -- comma
                                                                                    ) (lblContent lbl))) $
             (xpPair xpickle xpText)
 
@@ -248,3 +248,13 @@ prettySystem :: [(String,String,[Expression])] -> [String] -> Doc
 prettySystem procs sys = vcat $ [ text name <+> char '=' <+> text templ <> parens (prettyExprs comma args) <> semi
                                 | (name,templ,args) <- procs ] ++
                          [ text "system" <+> hsep (punctuate comma (fmap text sys)) <> semi ]
+
+prettyProperty :: Property -> String
+prettyProperty = render . prettyProperty'
+
+prettyProperty' :: Property -> Doc
+prettyProperty' (Possibly e)          = text "E<>" <+> prettyExpr 0 e
+prettyProperty' (Invariantly e)       = text "A[]" <+> prettyExpr 0 e
+prettyProperty' (PotentiallyAlways e) = text "E[]" <+> prettyExpr 0 e
+prettyProperty' (Eventually e)        = text "A<>" <+> prettyExpr 0 e
+prettyProperty' (LeadsTo e1 e2)       = prettyExpr 0 e1 <+> text "A<>" <+> prettyExpr 0 e2

@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveFunctor, GADTs #-}
 module Language.UPPAAL.Syntax where
 
 data Specification = Spec { specImports :: Maybe String
@@ -163,3 +163,11 @@ data Statement = Block [Declaration] [Statement]
                | StmtIf Expression Statement (Maybe Statement)
                | Return (Maybe Expression)
                deriving (Eq,Ord,Show)
+
+data Property where
+  Possibly          :: Expression -> Property               -- ^ E<> p
+  Invariantly       :: Expression -> Property               -- ^ A[] p
+  PotentiallyAlways :: Expression -> Property               -- ^ E[] p
+  Eventually        :: Expression -> Property               -- ^ A<> p
+  LeadsTo           :: Expression -> Expression -> Property -- ^ p --> q
+  deriving (Eq,Ord,Show)
