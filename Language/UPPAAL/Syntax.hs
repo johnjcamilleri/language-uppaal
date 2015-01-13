@@ -46,7 +46,7 @@ data Label = Label { lblKind :: LabelKind
 data Transition = Transition { transId :: Maybe String
                              , transSource :: String
                              , transTarget :: String
-                             , transLabel :: [Positional Label]
+                             , transLabels :: [Positional Label]
                              , transNails :: [(Integer,Integer)]
                              , transColor :: Maybe String
                              } deriving (Eq,Ord,Show)
