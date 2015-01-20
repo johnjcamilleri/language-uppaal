@@ -2,25 +2,27 @@
 module Language.UPPAAL.PrettyPrinter where
 
 import Language.UPPAAL.Syntax
-import Text.XML.HXT.Core (yes,withIndent)
+import qualified Text.XML.HXT.Core as Core
+import Text.XML.HXT.Core (yes,no)
 import Text.XML.HXT.Arrow.Pickle
 import Text.PrettyPrint
 
 prettySpecification :: Specification -> String
-prettySpecification = showPickled [withIndent yes]
+prettySpecification = showPickled [Core.withIndent yes, Core.withNoEmptyElemFor ["comment"]]
 
 instance XmlPickler Specification where
-  xpickle = xpElem "nta" $ xpWrap (\(i,d,t,inst,s) -> Spec i (error "Can't parse declarations yet") t inst (error "Can't parse system processes yet") (error "Can't parse system yet"),
-                                   \(Spec i d t inst p s) -> (i,case d of
+  xpickle = xpElem "nta" $ xpWrap (\(i,d,t,inst,s,q) -> Spec i (error "Can't parse declarations yet") t inst (error "Can't parse system processes yet") (error "Can't parse system yet") (error "Can't parse queries yet"),
+                                   \(Spec i d t inst p s q) -> (i,case d of
                                                                  [] -> Nothing
                                                                  _ -> Just $ render $ prettyDecls d,
-                                                              t,inst,render $ prettySystem p s))
-            (xp5Tuple
+                                                              t,inst,render $ prettySystem p s,q))
+            (xp6Tuple
              (xpOption $ xpElem "imports" xpText)
              (xpOption $ xpElem "declaration" xpText)
              (xpList1 xpickle)
              (xpOption $ xpElem "instantiation" xpText)
-             (xpElem "system" xpText))
+             (xpElem "system" xpText)
+             (xpElem "queries" xpickle))
 
 
 
@@ -85,6 +87,17 @@ instance XmlPickler Template where
                                 (xpList xpickle)
                                 (xpOption $ xpElem "init" $ xpTextAttr "ref")
                                 (xpList xpickle)))
+
+instance XmlPickler Query where
+  xpickle = xpElem "query" $ xpWrap (\_ -> error "Can't parse query yet",
+                                     \q -> (prettyFormula (queryFormula q), defStr "(none)" (queryComment q)))
+            (xpPair
+             (xpElem "formula" $ xpText)
+             (xpElem "comment" $ xpText)
+            )
+    where
+      defStr def "" = def
+      defStr _  str = str
 
 prettyDecls :: [Declaration] -> Doc
 prettyDecls decls = vcat (fmap prettyDecl decls)
@@ -249,12 +262,12 @@ prettySystem procs sys = vcat $ [ text name <+> char '=' <+> text templ <> paren
                                 | (name,templ,args) <- procs ] ++
                          [ text "system" <+> hsep (punctuate comma (fmap text sys)) <> semi ]
 
-prettyProperty :: Property -> String
-prettyProperty = render . prettyProperty'
+prettyFormula :: Formula -> String
+prettyFormula = render . prettyFormula'
 
-prettyProperty' :: Property -> Doc
-prettyProperty' (Possibly e)          = text "E<>" <+> prettyExpr 0 e
-prettyProperty' (Invariantly e)       = text "A[]" <+> prettyExpr 0 e
-prettyProperty' (PotentiallyAlways e) = text "E[]" <+> prettyExpr 0 e
-prettyProperty' (Eventually e)        = text "A<>" <+> prettyExpr 0 e
-prettyProperty' (LeadsTo e1 e2)       = prettyExpr 0 e1 <+> text "A<>" <+> prettyExpr 0 e2
+prettyFormula' :: Formula -> Doc
+prettyFormula' (Possibly e)          = text "E<>" <+> prettyExpr 0 e
+prettyFormula' (Invariantly e)       = text "A[]" <+> prettyExpr 0 e
+prettyFormula' (PotentiallyAlways e) = text "E[]" <+> prettyExpr 0 e
+prettyFormula' (Eventually e)        = text "A<>" <+> prettyExpr 0 e
+prettyFormula' (LeadsTo e1 e2)       = prettyExpr 0 e1 <+> text "-->" <+> prettyExpr 0 e2

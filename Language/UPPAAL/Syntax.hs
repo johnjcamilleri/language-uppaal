@@ -7,6 +7,7 @@ data Specification = Spec { specImports :: Maybe String
                           , specInstantiation :: Maybe String
                           , specProcesses :: [(String,String,[Expression])]
                           , specSystem :: [String]
+                          , specQueries :: [Query]
                           } deriving (Eq,Ord,Show)
 
 data Positional a = Positional { position :: Maybe (Integer,Integer)
@@ -164,9 +165,13 @@ data Statement = Block [Declaration] [Statement]
                | Return (Maybe Expression)
                deriving (Eq,Ord,Show)
 
-data Property = Possibly Expression           -- ^ E<> p
-              | Invariantly Expression        -- ^ A[] p
-              | PotentiallyAlways Expression  -- ^ E[] p
-              | Eventually Expression         -- ^ A<> p
-              | LeadsTo Expression Expression -- ^ p --> q
-              deriving (Eq,Ord,Show)
+data Query = Query { queryFormula :: Formula
+                   , queryComment :: String
+                   } deriving (Eq,Ord,Show)
+
+data Formula = Possibly Expression           -- ^ E<> p
+             | Invariantly Expression        -- ^ A[] p
+             | PotentiallyAlways Expression  -- ^ E[] p
+             | Eventually Expression         -- ^ A<> p
+             | LeadsTo Expression Expression -- ^ p --> q
+             deriving (Eq,Ord,Show)

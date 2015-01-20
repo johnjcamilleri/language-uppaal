@@ -1,6 +1,6 @@
 Name:		language-uppaal
-Version:	0.1
-Author:		Henning Günther
+Version:	0.2
+Author:		Henning Günther, John J. Camilleri
 Build-Type:	Simple
 Cabal-Version:	>= 1.2
 Description:
