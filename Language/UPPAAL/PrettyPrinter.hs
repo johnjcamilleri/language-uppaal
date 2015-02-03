@@ -8,7 +8,7 @@ import Text.XML.HXT.Arrow.Pickle
 import Text.PrettyPrint
 
 prettySpecification :: Specification -> String
-prettySpecification = showPickled [Core.withIndent yes, Core.withNoEmptyElemFor ["comment"]]
+prettySpecification = showPickled [Core.withIndent yes, Core.withNoEmptyElemFor ["comment","queries"]]
 
 instance XmlPickler Specification where
   xpickle = xpElem "nta" $ xpWrap (\(i,d,t,inst,s,q) -> Spec i (error "Can't parse declarations yet") t inst (error "Can't parse system processes yet") (error "Can't parse system yet") (error "Can't parse queries yet"),
